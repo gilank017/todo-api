@@ -4,34 +4,38 @@ namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
 use App\Helpers\ApiResponse as Controller;
-use App\Http\Resources\UsersResource;
-use App\Models\Users;
+use App\Http\Resources\ProductsResource;
+use App\Models\Products;
 use Illuminate\Support\Facades\Validator;
 
 
-class UsersController extends Controller
+class ProductsController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $data = Users::all();
-        if ($data) {
-            return $this->sendResponse($data, 'Users Loaded Successfully');
+        $data = Products::query();
+        if ($sort = $request->input(key:'sort')) {
+            $data->orderBy('price', $sort);
+        };
+        $perPage = 5;
+        $page = $request->input('page', 1);
+        $totalpage = $data->count();
+        $pagination = $data->offset(($page - 1) * $perPage)->limit($perPage);
+        $result = $pagination->get();
+        $finalResult = [
+            'documents' => $result,
+            'page' => $page,
+            'total' => $totalpage,
+            'last_page' => ceil($totalpage / $perPage)
+        ];
+        if ($finalResult) {
+            return $this->sendResponse($finalResult, 'Products Loaded Successfully');
         }
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
     }
 
     /**
@@ -44,17 +48,18 @@ class UsersController extends Controller
     {
         $input = $request->all();
         $validator = Validator::make($input, [
-            'username' => 'required',
-            'address' => 'required'
+            'name' => 'required',
+            'price' => 'required|numeric',
+
         ]);
-   
+
         if($validator->fails()){
             return $this->sendError('Validation Error.', $validator->errors());       
         }
 
-        $users = Users::create($input);
+        $product = Products::create($input);
    
-        return $this->sendResponse($users, 'User created successfully.');
+        return $this->sendResponse($product, 'Product created successfully.');
     }
 
     /**
@@ -65,13 +70,13 @@ class UsersController extends Controller
      */
     public function show($id)
     {
-        $users = Users::find($id);
+        $product = Products::find($id);
   
-        if (is_null($users)) {
-            return $this->sendError('User not found.');
+        if (is_null($product)) {
+            return $this->sendError('Product not found.');
         }
    
-        return $this->sendResponse(new UsersResource($users), 'User retrieved successfully.');
+        return $this->sendResponse(new ProductsResource($product), 'Product retrieved successfully.');
     }
 
     /**
@@ -97,22 +102,22 @@ class UsersController extends Controller
         $input = $request->all();
 
         $validator = Validator::make($input, [
-            'username' => 'required',
-            'address' => 'required'
+            'name' => 'required',
+            'price' => 'required|numeric'
         ]);
 
         if($validator->fails()){
             return $this->sendError('Validation Error.', $validator->errors());       
         }
 
-        $users = Users::findOrFail($id);
+        $product = Products::findOrFail($id);
 
-        $users->update([
-            'username' => $request->username,
-            'address' => $request->address
+        $product->update([
+            'name' => $request->name,
+            'price' => $request->price
         ]);
 
-        return $this->sendResponse(new UsersResource($users), 'User updated successfully.');
+        return $this->sendResponse(new ProductsResource($product), 'Product updated successfully.');
     }
 
     /**
@@ -121,9 +126,9 @@ class UsersController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Users $users)
+    public function destroy(Products $product)
     {
-        $users->delete();
-        return $this->sendResponse([], 'User deleted successfully.');
+        $product->delete();
+        return $this->sendResponse([], 'Product deleted successfully.');
     }
 }
