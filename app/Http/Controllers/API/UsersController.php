@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Helpers\ApiResponse;
-use App\Http\Controllers\Controller;
+use App\Helpers\ApiResponse as Controller;
+// use App\Http\Controllers\Controller;
 use App\Http\Requests\UserPostRequest;
 use App\Models\Users;
-use Exception;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 
 class UsersController extends Controller
@@ -20,9 +20,7 @@ class UsersController extends Controller
     {
         $data = Users::all();
         if ($data) {
-            return ApiResponse::responseApi(200, 'Success', $data);
-        } else {
-            return ApiResponse::responseApi(404, 'Failed');
+            return $this->sendResponse($data, 'User Loaded Successfully');
         }
     }
 
@@ -42,15 +40,21 @@ class UsersController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(UserPostRequest $request)
+    public function store(Request $request)
     {
-        $request->validate([
-            'username' => ['required'],
-            'address' => ['required']
+        $input = $request->all();
+        $validator = Validator::make($input, [
+            'username' => 'required',
+            'address' => 'required'
         ]);
-        $data = Users::create($request->all());
+   
+        if($validator->fails()){
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
 
-        return ApiResponse::responseApi(200, 'User Added Successfully', $data);
+        $users = Users::create($input);
+   
+        return $this->sendResponse($users, 'Users created successfully.');
     }
 
     /**
@@ -61,12 +65,7 @@ class UsersController extends Controller
      */
     public function show($id)
     {
-        $data = Users::where('id', '=', $id)->get();
-        if ($data) {
-            return ApiResponse::responseApi(200, 'Success', $data);
-        } else {
-            return ApiResponse::responseApi(404, 'User Not Found');
-        }
+        //
     }
 
     /**
@@ -87,9 +86,9 @@ class UsersController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(UserPostRequest $request, Users $users)
     {
-        //
+        // 
     }
 
     /**

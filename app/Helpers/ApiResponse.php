@@ -2,21 +2,36 @@
 
 namespace App\Helpers;
 
-class ApiResponse 
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller as Controller;
+
+class ApiResponse extends Controller
 {
-  protected static $response = [
-    'code' => null,
-    'message' => null,
-    'data' => null
-  ];
-
-  public static function responseApi($code = null, $message = null, $data = null) 
-  {
-    self::$response['code'] = $code;
-    self::$response['message'] = $message;
-    self::$response['data'] = $data;
+  public function sendResponse($result, $message)
+    {
+    	$response = [
+            'success' => true,
+            'data'    => $result,
+            'message' => $message,
+        ];
 
 
-    return response()->json(self::$response, self::$response['code']);
-  }  
+        return response()->json($response, 200);
+    }
+
+    public function sendError($error, $errorMessages = [], $code = 404)
+    {
+    	$response = [
+            'success' => false,
+            'message' => $error,
+        ];
+
+
+        if(!empty($errorMessages)){
+            $response['data'] = $errorMessages;
+        }
+
+
+        return response()->json($response, $code);
+    }
 }
