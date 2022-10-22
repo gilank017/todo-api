@@ -16,12 +16,27 @@ class UsersController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $data = Users::all();
-        if ($data) {
-            return $this->sendResponse($data, 'Users Loaded Successfully');
+        $users = Users::query();
+        $perPage = 10;
+        $page = $request->input('page', 1);
+        $totalPage = $users->count();
+        $pagination = $users->offset(($page - 1) * $perPage)->limit($perPage);
+        $result = $pagination->get();
+        $finalResult = [
+            'documents' => $result,
+            'current_page' => $page,
+            'total_page' => $totalPage,
+            'last_page' => ceil($totalPage / $perPage)
+        ];
+        if ($finalResult) {
+            return $this->sendResponse($finalResult, 'Users Loaded Successfully');
         }
+        // $data = Users::all();
+        // if ($data) {
+        //     return $this->sendResponse($data, 'Users Loaded Successfully');
+        // }
     }
 
     /**

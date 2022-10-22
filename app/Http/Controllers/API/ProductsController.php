@@ -29,7 +29,7 @@ class ProductsController extends Controller
         $result = $pagination->get();
         $finalResult = [
             'documents' => $result,
-            'page' => $page,
+            'current_page' => $page,
             'total' => $totalpage,
             'last_page' => ceil($totalpage / $perPage)
         ];
