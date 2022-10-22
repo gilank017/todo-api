@@ -27,7 +27,7 @@ class UsersController extends Controller
         $finalResult = [
             'documents' => $result,
             'current_page' => $page,
-            'total_page' => $totalPage,
+            'total' => $totalPage,
             'last_page' => ceil($totalPage / $perPage)
         ];
         if ($finalResult) {
