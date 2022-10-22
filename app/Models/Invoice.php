@@ -5,19 +5,21 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Users extends Model
+class Invoice extends Model
 {
     use HasFactory;
-    protected $table = 'users';
+    protected $table = 'invoice';
     protected $fillable = [
-        'username',
-        'address'
+        'invoice_id',
+        'user_id',
+        'date',
+        'status'
     ];
-    protected $primaryKey = 'id';
     protected $hidden = [];
     public $timestamps = false;
+    
 
-    public function invoice() {
-        return $this->hasOne(Invoice::class , 'user_id', 'id');
+    public function users() {
+        return $this->belongsTo(Users::class, 'user_id', 'id');
     }
 }
