@@ -18,4 +18,8 @@ class Products extends Model
 
     protected $hidden = [];
     public $timestamps = false;
+
+    public function invoiceDetail() {
+        return $this->hasOne(InvoiceDetails::class, 'product_id', 'id');
+    }
 }

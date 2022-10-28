@@ -15,11 +15,17 @@ class Invoice extends Model
         'date',
         'status'
     ];
-    protected $hidden = [];
+    protected $hidden = [
+        'user_id'
+    ];
     public $timestamps = false;
     
 
     public function users() {
         return $this->belongsTo(Users::class, 'user_id', 'id');
+    }
+
+    public function items() {
+        return $this->hasMany(InvoiceDetails::class, 'invoice_id', 'id');
     }
 }
